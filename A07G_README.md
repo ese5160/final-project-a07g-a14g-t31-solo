@@ -41,7 +41,9 @@ HRS 06: The device shall be powered by a single-cell Li-ion battery and include 
 HRS 07: The total weight of the device, including all components, shall be less than 50 grams to maintain racket balance and feel.
 
 2. Software Requirements Specification (SRS)
+
 2.1 Overview
+
 The Badminton Assist Device software processes real-time data from sensors, provides immediate feedback via LEDs and a buzzer, and transmits performance metrics to a mobile application. It enables users to monitor hit counts, stroke force, and session duration, while also allowing them to set training goals and configure device feedback settings.
 
 Additionally, the software incorporates power management features to maximize battery life and ensures error handling for sensor inconsistencies.
