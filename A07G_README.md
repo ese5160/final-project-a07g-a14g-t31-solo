@@ -7,12 +7,14 @@
 * Description of test hardware: (development boards, sensors, actuators, laptop + OS, etc)
 
 1. Hardware Requirements Specification (HRS)
+
 1.1 Overview
 The Badminton Assist Device is a lightweight, IoT-enabled training tool that attaches to the base of a badminton racket handle. It is designed to monitor key performance metrics, including hit count, stroke force, and time intervals between hits. The device achieves this using a combination of motion and vibration sensors.
 
 The SAMW25 microcontroller serves as the central processing unit, handling sensor data processing, feedback mechanisms, and wireless communication. Real-time feedback is provided through LED indicators and a buzzer, while performance data is transmitted wirelessly to a companion mobile app for in-depth analysis.
 
 1.2 Definitions, Abbreviations
+
 MCU: Microcontroller Unit
 I²C: Inter-Integrated Circuit, a communication protocol for sensor communication
 LIS2DS12TR: A low-power 3-axis accelerometer used for step counting and movement detection
@@ -23,12 +25,19 @@ Wi-Fi: Wireless communication technology for data transmission
 SAMW25: The primary microcontroller integrating the SAMD21 core and WINC1500 Wi-Fi IC for data processing and wireless communication
 
 1.3 Functionality
+
 HRS 01: The device shall be built around the SAMW25 microcontroller, which integrates the SAMD21 core and WINC1500 Wi-Fi module. This microcontroller will handle sensor integration, data processing, and wireless communication.
+
 HRS 02: A LIS2DS12TR accelerometer shall be used for motion detection and step counting. It will measure movement patterns, estimate stroke force, and track hit counts. Communication with the SAMW25 shall be via the I2C protocol.
+
 HRS 03: A MPU6000 accelerometer and gyroscope sensor shall be included to detect precise racket movements and vibrations. This sensor will improve stroke force estimation and impact accuracy. It shall also communicate with the SAMW25 via I2C.
+
 HRS 04: The device shall include an LED indicator that lights up after each successful hit, providing immediate visual feedback. The SAMW25 shall control the LED.
+
 HRS 05: A buzzer shall be integrated to provide auditory feedback when the player reaches their target hit count. The SAMW25 shall control the buzzer.
+
 HRS 06: The device shall be powered by a single-cell Li-ion battery and include a charging circuit for USB recharging.
+
 HRS 07: The total weight of the device, including all components, shall be less than 50 grams to maintain racket balance and feel.
 
 2. Software Requirements Specification (SRS)
