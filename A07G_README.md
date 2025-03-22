@@ -55,6 +55,7 @@ App: Mobile application interfacing with the device for data visualization and c
 SRS: Software Requirements Specification
 
 2.4 Functionality
+
 SRS 01 The software shall read 3-axis accelerometer and gyroscope data from the MPU6000 sensor at 10-millisecond intervals using I²C or SPI protocol to calculate stroke force, movement patterns, and vibration analysis.
 
 SRS 02 The software shall read step count and movement data from the LIS2DS12TR accelerometer to provide real-time motion tracking and refined hit detection.
