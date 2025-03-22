@@ -6,7 +6,8 @@
 * GitHub Repository URL:
 * Description of test hardware: (development boards, sensors, actuators, laptop + OS, etc)
 
-1. Hardware Requirements Specification (HRS)
+# 1 Software Architecture 
+## 1. Hardware Requirements Specification (HRS)
 
 1.1 Overview
 The Badminton Assist Device is a lightweight, IoT-enabled training tool that attaches to the base of a badminton racket handle. It is designed to monitor key performance metrics, including hit count, stroke force, and time intervals between hits. The device achieves this using a combination of motion and vibration sensors.
@@ -40,7 +41,7 @@ HRS 06: The device shall be powered by a single-cell Li-ion battery and include 
 
 HRS 07: The total weight of the device, including all components, shall be less than 50 grams to maintain racket balance and feel.
 
-2. Software Requirements Specification (SRS)
+## 2. Software Requirements Specification (SRS)
 
 2.1 Overview
 
@@ -93,3 +94,79 @@ Sensor data inconsistencies (e.g., missing or noisy readings).
 Communication failures between the MCU and sensors.
 Wi-Fi transmission errors (e.g., lost connection).
 When an error occurs, the device shall notify the user via the app and optionally trigger an LED or buzzer alert.
+
+# 2. Understanding the starter code
+
+1. What does InitializeSerialConsole() do? What is cbufRx and cbufTx? What type of data structure is it?
+
+InitializeSerialConsole() sets up the UART interface and registers its read/write callbacks. Specifically, it:
+
+Initializes two circular buffers: cbufRx for receiving and cbufTx for transmitting.
+
+Configures the SERCOM module (USART) to 115200 baud, 8N1 format.
+
+Sets up the interrupt callbacks for reading and writing.
+
+Begins an asynchronous read operation to capture the first UART character.
+cbufRx and cbufTx are both of type cbuf_handle_t. They are handles to circular (ring) buffers, which are data structures that efficiently store and manage continuous streams of data in a FIFO manner.
+
+2. How are cbufRx and cbufTx initialized? Where is the library that defines them? (Please list the .c file they come from.)
+
+They are initialized using the function circular_buf_init() in InitializeSerialConsole():
+cbufRx = circular_buf_init((uint8_t *)rxCharacterBuffer, RX_BUFFER_SIZE);
+cbufTx = circular_buf_init((uint8_t *)txCharacterBuffer, TX_BUFFER_SIZE);
+
+These buffers are implemented via a custom circular buffer library. The function circular_buf_init() is defined in the file:
+circular_buffer.c
+
+3. Where are the character arrays where the RX and TX characters are being stored at the end? Please mention their name and size.
+
+The character arrays used as backing stores for the circular buffers are:
+
+rxCharacterBuffer[512] — for storing received UART characters.
+
+txCharacterBuffer[512] — for storing characters to be transmitted.
+
+Each buffer is 512 bytes in size.
+
+4. Where are the interrupts for UART character received and UART character sent defined?
+
+The USART interrupt callbacks are registered in the function configure_usart_callbacks() in SerialConsole.c:
+usart_register_callback(&usart_instance, usart_write_callback, USART_CALLBACK_BUFFER_TRANSMITTED);
+usart_register_callback(&usart_instance, usart_read_callback, USART_CALLBACK_BUFFER_RECEIVED);
+
+The actual callback functions are defined as:
+
+void usart_read_callback(struct usart_module *const usart_module);
+
+void usart_write_callback(struct usart_module *const usart_module);
+
+5. What are the callback functions that are called when:
+
+a. A character is received (RX)?
+
+usart_read_callback(struct usart_module *const usart_module)
+
+b. A character has been sent (TX)?
+
+usart_write_callback(struct usart_module *const usart_module)
+
+6. Explain what is being done on each of these two callbacks and how they relate to cbufRx and cbufTx.
+
+usart_read_callback (RX):
+This function is currently marked as TODO in the starter code, but it is meant to be called when a character has been received via UART. In the complete version, it should:
+
+Store latestRx into the cbufRx buffer using circular_buf_put().
+
+Restart the usart_read_buffer_job() to continuously receive the next character.
+
+Optionally notify the CLI thread (via semaphore or task notification) that a new character is available.
+
+usart_write_callback (TX):
+This function is already implemented. It:
+
+Checks if there are more characters in cbufTx.
+
+If so, pops the next character using circular_buf_get() and restarts the UART transmission using usart_write_buffer_job().
+
+This mechanism ensures a seamless circular buffer-based UART system where RX characters are added to cbufRx and TX characters are pulled from cbufTx.
