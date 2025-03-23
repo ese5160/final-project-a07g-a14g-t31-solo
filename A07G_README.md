@@ -181,3 +181,18 @@ The `StartTasks()` function is responsible for initializing FreeRTOS tasks. In t
 - It then prints the remaining heap after task creation.
 
 Only one thread is started in `StartTasks()`: the CLI task.
+
+# 3. Debug Logger Module
+Code uploaded.
+
+# 4. Wiretap the convo
+1. TX and GND
+2. Just attach to the exposed header pins 
+3. Protocol: UART<br>
+Baud Rate: 115200 <br>
+Data Bits: 8<br>
+Parity: None<br>
+Stop Bits: 1<br>
+Bit Order: LSB first<br>
+Capture Edge: Falling edge<br>
+
