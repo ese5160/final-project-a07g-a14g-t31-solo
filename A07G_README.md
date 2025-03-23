@@ -170,3 +170,14 @@ Checks if there are more characters in cbufTx.
 If so, pops the next character using circular_buf_get() and restarts the UART transmission using usart_write_buffer_job().
 
 This mechanism ensures a seamless circular buffer-based UART system where RX characters are added to cbufRx and TX characters are pulled from cbufTx.
+
+9. What is done on the function `StartTasks()` in `main.c`? How many threads are started?
+
+The `StartTasks()` function is responsible for initializing FreeRTOS tasks. In the current starter code:
+
+- It prints the amount of heap memory available before starting any tasks.
+- It starts the CLI task by calling `xTaskCreate()` with the function `vCommandConsoleTask`.
+- It checks if the task was created successfully; if not, it prints an error.
+- It then prints the remaining heap after task creation.
+
+Only one thread is started in `StartTasks()`: the CLI task.
