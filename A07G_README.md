@@ -41,6 +41,11 @@ HRS 06: The device shall be powered by a single-cell Li-ion battery and include 
 
 HRS 07: The total weight of the device, including all components, shall be less than 50 grams to maintain racket balance and feel.
 
+2.Block digram
+![image](https://github.com/user-attachments/assets/b5d4d32f-531d-45fa-b027-35dd82bba2dc)
+
+3.flow digram
+
 ## 2. Software Requirements Specification (SRS)
 
 2.1 Overview
