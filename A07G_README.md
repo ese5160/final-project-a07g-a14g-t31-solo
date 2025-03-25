@@ -45,6 +45,8 @@ HRS 07: The total weight of the device, including all components, shall be less 
 ![image](https://github.com/user-attachments/assets/b5d4d32f-531d-45fa-b027-35dd82bba2dc)
 
 3.flow digram
+![image](https://github.com/user-attachments/assets/64574ee2-96a3-42f4-a320-dd189f2f0074)
+
 
 ## 2. Software Requirements Specification (SRS)
 
