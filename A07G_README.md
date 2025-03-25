@@ -211,5 +211,8 @@ Bit Order: LSB first<br>
 Capture Edge: Falling edge<br>
 <img width="1280" alt="aaecabdc476e5c647b16fa7002b43eb" src="https://github.com/user-attachments/assets/7edcf75d-7835-4a4b-a722-3ebd66232ff1" />
 
+# 5. Complete the CLI
+Code uploaded.
+
 
 
