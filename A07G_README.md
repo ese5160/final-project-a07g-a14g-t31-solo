@@ -178,6 +178,13 @@ If so, pops the next character using circular_buf_get() and restarts the UART tr
 
 This mechanism ensures a seamless circular buffer-based UART system where RX characters are added to cbufRx and TX characters are pulled from cbufTx.
 
+7.
+![image](https://github.com/user-attachments/assets/28a7c194-45a7-4f12-9105-f085093f706a)
+
+8.
+![image](https://github.com/user-attachments/assets/4c11f962-8ed1-4f2e-aeff-606adbdcf2d2)
+
+
 9. What is done on the function `StartTasks()` in `main.c`? How many threads are started?
 
 The `StartTasks()` function is responsible for initializing FreeRTOS tasks. In the current starter code:
