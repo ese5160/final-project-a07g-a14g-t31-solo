@@ -37,7 +37,9 @@ BaseType_t xCliClearTerminalScreen( char *pcWriteBuffer,size_t xWriteBufferLen,c
 #define CLI_HELP_CLEAR_SCREEN			"cls: Clears the terminal screen\r\n"
 #define CLI_CALLBACK_CLEAR_SCREEN		(pdCOMMAND_LINE_CALLBACK)xCliClearTerminalScreen
 #define CLI_PARAMS_CLEAR_SCREEN			0
+#include "semphr.h"
 
+extern SemaphoreHandle_t xRxNotificationSemaphore;
 
 void vCommandConsoleTask( void *pvParameters );
 

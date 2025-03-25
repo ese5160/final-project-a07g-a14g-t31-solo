@@ -27,7 +27,8 @@
  * Includes
  ******************************************************************************/
 #include "SerialConsole.h"
-
+#include "CliThread.h" 
+extern SemaphoreHandle_t xRxNotificationSemaphore;
 /******************************************************************************
  * Defines
  ******************************************************************************/
@@ -147,7 +148,13 @@ void setLogLevel(enum eDebugLogLevels debugLevel)
 }
 
 /**
- * @brief Logs a message at the specified debug level.
+ *
+ * This function prints the message only if the log level is greater than
+ * or equal to the current system log level. The message is formatted like printf.
+ *
+ * @param level Log severity (e.g. LOG_INFO_LVL, LOG_ERROR_LVL).
+ * @param format Format string (e.g. "Temp is %d\n").
+ * @param ... Additional arguments for formatting.
  */
 void LogMessage(enum eDebugLogLevels level, const char *format, ...)
 {
@@ -224,13 +231,35 @@ static void configure_usart_callbacks(void)
 /**************************************************************************/ 
 /**
  * @fn			void usart_read_callback(struct usart_module *const usart_module)
- * @brief		Callback called when the system finishes receives all the bytes requested from a UART read job
-		 Students to fill out. Please note that the code here is dummy code. It is only used to show you how some functions work.
- * @note
+ * @brief UART receive complete callback function.
+ *
+ * This function is automatically called by the ASF UART driver when a character is
+ * received via SERCOM4. It performs three critical actions:
+ *
+ * 1. Saves the received character (`latestRx`) into the RX circular buffer (`cbufRx`)
+ *    using `circular_buf_put()`, so it can be retrieved later by the CLI thread.
+ *
+ * 2. Immediately restarts the UART read job using `usart_read_buffer_job()` to
+ *    continue receiving characters asynchronously. This ensures the system
+ *    continuously listens for UART input without blocking.
+ *
+ * 3. Signals the CLI thread using a FreeRTOS binary semaphore
+ *    (`xRxNotificationSemaphore`). This unblocks `FreeRTOS_read()` so it can
+ *    retrieve the new character from the RX buffer.
+ * @note This function runs in interrupt context. It uses `xSemaphoreGiveFromISR()`
+ *       and `portYIELD_FROM_ISR()` to safely notify the CLI task.
  *****************************************************************************/
 void usart_read_callback(struct usart_module *const usart_module)
 {
-	// ToDo: Complete this function 
+	circular_buf_put(cbufRx, latestRx);
+
+	// Restart read job for next byte
+	usart_read_buffer_job(&usart_instance, (uint8_t *)&latestRx, 1);
+
+	// Notify CLI thread
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+	xSemaphoreGiveFromISR(xRxNotificationSemaphore, &xHigherPriorityTaskWoken);
+	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
 /**************************************************************************/ 

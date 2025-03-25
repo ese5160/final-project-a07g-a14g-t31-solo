@@ -10,10 +10,47 @@
  * Includes
  ******************************************************************************/
 #include "CliThread.h"
+#include "SerialConsole.h"
+#define FW_VERSION "0.0.1"
+
+SemaphoreHandle_t xRxNotificationSemaphore;
+
+
 
 /******************************************************************************
  * Defines
  ******************************************************************************/
+
+/**
+ * @brief Prints the current firmware version string.
+ *
+ * @param[in] pcWriteBuffer Buffer to write the output string to.
+ * @param[in] xWriteBufferLen Size of the output buffer.
+ * @param[in] pcCommandString Input command (not used).
+ *
+ * @return pdFALSE to indicate no more output to print.
+ */
+BaseType_t CLI_VersionCommand(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString)
+{
+    snprintf((char *)pcWriteBuffer, xWriteBufferLen, "Firmware Version: %s\r\n", FW_VERSION);
+    return pdFALSE;
+}
+
+/**
+ * @brief Prints the current number of FreeRTOS ticks since boot.
+ *
+ * @param[in] pcWriteBuffer Buffer to write the output string to.
+ * @param[in] xWriteBufferLen Size of the output buffer.
+ * @param[in] pcCommandString Input command (not used).
+ *
+ * @return pdFALSE to indicate no more output to print.
+ */
+BaseType_t CLI_TicksCommand(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString)
+{
+    snprintf((char *)pcWriteBuffer, xWriteBufferLen, "System Ticks: %lu\r\n", xTaskGetTickCount());
+    return pdFALSE;
+}
+
 
 /******************************************************************************
  * Variables
@@ -35,6 +72,23 @@ static const CLI_Command_Definition_t xResetCommand =
         "reset: Resets the device\r\n",
         (const pdCOMMAND_LINE_CALLBACK)CLI_ResetDevice,
         0};
+		
+static const CLI_Command_Definition_t xVersionCommand =
+{
+	"version",
+	"version: Displays firmware version.\r\n",
+	CLI_VersionCommand,
+	0
+};
+
+static const CLI_Command_Definition_t xTicksCommand =
+{
+	"ticks",
+	"ticks: Displays system uptime in ticks.\r\n",
+	CLI_TicksCommand,
+	0
+};
+
 
 /******************************************************************************
  * Forward Declarations
@@ -51,9 +105,14 @@ static void FreeRTOS_read(char *character);
 void vCommandConsoleTask(void *pvParameters)
 {
     // REGISTER COMMANDS HERE
-
+	xRxNotificationSemaphore = xSemaphoreCreateBinary();
     FreeRTOS_CLIRegisterCommand(&xClearScreen);
     FreeRTOS_CLIRegisterCommand(&xResetCommand);
+	FreeRTOS_CLIRegisterCommand(&xVersionCommand);
+	FreeRTOS_CLIRegisterCommand(&xTicksCommand);
+
+	
+	
 
     uint8_t cRxedChar[2], cInputIndex = 0;
     BaseType_t xMoreDataToFollow;
@@ -209,15 +268,30 @@ void vCommandConsoleTask(void *pvParameters)
 
 /**************************************************************************/ /**
  * @fn			void FreeRTOS_read(char* character)
- * @brief		STUDENTS TO COMPLETE. This function block the thread unless we received a character. How can we do this?
-                 There are multiple solutions! Check all the inter-thread communications available! See https://www.freertos.org/a00113.html
- * @details		STUDENTS TO COMPLETE.
+ * This function waits for a UART character by blocking on a binary semaphore.
+ * It is signaled by the UART receive interrupt (usart_read_callback) and will
+ * then read one character from the RX circular buffer.
+ * 
+ * When the semaphore is given by `usart_read_callback()`, this function reads the
+ * character from the RX circular buffer (`cbufRx`) using `SerialConsoleReadCharacter()`
+ * and stores it into the memory pointed to by `character`.
  * @note
  *****************************************************************************/
 static void FreeRTOS_read(char *character)
 {
-    // ToDo: Complete this function
-    vTaskSuspend(NULL); // We suspend ourselves. Please remove this when doing your code
+	// Wait indefinitely for a character to be available
+	if (xRxNotificationSemaphore != NULL && character != NULL)
+	{
+		if (xSemaphoreTake(xRxNotificationSemaphore, portMAX_DELAY) == pdTRUE)
+		{
+			if (SerialConsoleReadCharacter((uint8_t *)character) != -1)
+			{
+				return;
+			}
+		}
+	}
+
+	*character = 0; // fallback, just in case
 }
 
 /******************************************************************************
@@ -242,3 +316,4 @@ BaseType_t CLI_ResetDevice(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const 
     system_reset();
     return pdFALSE;
 }
+
